@@ -1,0 +1,17 @@
+GA Info:
+
+- Number of variables: 7
+- Population size: 50
+- Fitness evaluations: 500000
+- Tournament size: 3
+- Mutation probability: 0.2
+- Crossover Operator: 0
+Seed: -2562856340224525047
+Best fitness in initial population: 50.0
+Best initial individual: Function 166341770282517459781823824379366363182
+Best fitness in final population: 54.0
+Best final individual: Function 315425486811867338122842170457531405077
+
+real	0m17.208s
+user	0m17.030s
+sys	0m0.140s

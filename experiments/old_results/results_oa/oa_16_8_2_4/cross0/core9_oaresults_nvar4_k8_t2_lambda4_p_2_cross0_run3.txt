@@ -1,0 +1,52 @@
+GA Info:
+
+- Number of variables: 4
+- OA Profile: (16, 8, 2, 4)
+- Population size: 50
+- Fitness evaluations: 500000
+- Tournament size: 3
+- Mutation probability: 0.2
+- Crossover Operator: 0
+- Seed: 6685364809336349742
+Best fitness in initial population: 60.552845821947685
+Best initial individual:
+1 1 1 0 1 1 0 0 
+1 1 0 1 0 1 0 0 
+0 0 0 0 0 1 1 0 
+1 0 1 1 1 1 0 1 
+1 0 0 1 1 0 1 1 
+1 1 1 0 1 1 1 1 
+0 1 1 1 0 0 0 1 
+0 1 0 0 1 1 1 0 
+1 0 1 1 0 1 0 0 
+0 1 0 0 0 0 0 1 
+1 0 0 1 1 0 0 0 
+0 0 0 1 1 0 0 1 
+0 0 1 0 1 1 1 0 
+1 0 1 1 0 0 1 0 
+1 1 0 0 0 0 0 0 
+0 1 1 0 1 1 0 0 
+
+Best fitness in final population: 27.899494936611667
+Best initial individual:
+1 0 1 1 0 1 1 0 
+0 0 0 0 0 1 1 1 
+0 1 0 0 0 0 0 0 
+1 0 0 1 0 0 0 0 
+1 0 0 0 1 1 0 1 
+1 1 1 0 1 0 0 1 
+0 0 1 0 1 0 1 1 
+0 1 1 0 0 1 1 1 
+1 1 1 1 0 0 1 0 
+1 0 1 1 1 1 0 0 
+1 1 0 1 0 1 0 1 
+1 1 0 0 0 0 1 0 
+0 0 0 0 1 1 1 0 
+0 1 1 1 1 0 0 0 
+0 1 0 1 1 0 1 1 
+0 0 1 1 0 1 0 1 
+
+
+real	4m32.067s
+user	4m31.710s
+sys	0m0.460s

@@ -1,0 +1,24 @@
+PARAMETERS USED IN GA EXPERIMENTS
+=================================
+
+- population size: 50
+- tournament size: 3
+- mutation probability: 0.7 and 0.9 for balanced nonlinear Boolean functions
+  and bent Boolean functions problems, 0.2 for OA problem
+- number of experimental runs: 50
+- fitness evaluations per run: 500000
+
+The choice for this particular parameters (especially for mutation
+probability) is motivated by the need of comparing our results with those
+reported in the papers below:
+
+[1] Luca Mariot, Stjepan Picek, Domagoj Jakobovic, Alberto Leporati:
+    Evolutionary Search of Binary Orthogonal Arrays. PPSN (1) 2018: 121-133
+
+[2] Stjepan Picek, Dominik Sisejkovic, Domagoj Jakobovic: Immunological
+    algorithms paradigm for construction of Boolean functions with good
+    cryptographic properties. Eng. Appl. of AI 62: 320-330 (2017)
+
+[3] Stjepan Picek, Domagoj Jakobovic, Julian F. Miller, Lejla Batina, Marko
+    Cupic: Cryptographic Boolean functions: One output, many design
+    criteria. Appl. Soft Comput. 40: 635-653 (2016)

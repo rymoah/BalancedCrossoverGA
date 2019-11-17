@@ -1,0 +1,5 @@
+NOTE
+
+This set of experiments refers to the first submission of the paper, where the
+mutation probability was 0.2 for all three problems and the balanced crossover
+operator did not shuffle the positions of the parents.

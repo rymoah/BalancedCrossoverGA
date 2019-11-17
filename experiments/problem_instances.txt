@@ -1,0 +1,24 @@
+PROBLEM INSTANCES
+=================
+
+Problem 1: Balanced Nonlinear Boolean Functions (n = number of variables of the functions)
+
+n = 6 (unbalanced search space size: 2^64 ~ 1.84e10^19  ; balanced search space size: binom(64, 32) ~ 1.83e10^18)
+n = 7 (unbalanced search space size: 2^128 ~ 3.40e10^38 ; balanced search space size: binom(128, 64) ~ 2.40e10^37)
+n = 8 (unbalanced search space size: 2^256 ~ 1.16e10^77 ; balanced search space size: binom(256, 128) ~ 5.77e10^75)
+
+Problem 2: Bent Boolean Functions (n = number of variables of the functions, must be even)
+
+n = 6 (unbalanced search space size: 2^64 ~ 1.84e10^19  ; balanced search space size: binom(64, 32) ~ 1.83e10^18)
+n = 8 (unbalanced search space size: 2^256 ~ 1.16e10^77 ; balanced search space size: binom(256, 128) ~ 5.77e10^75)
+n = 10 (unbalanced search space size: 2^1024 ~ 1.80e10^308 ; balanced search space size: binom(1024, 512) ~ 4.48e10^307)
+
+Problem 3: Binary Orthogonal Arrays via Boolean Functions (OA(N, k, t, lambda),
+where N=number of rows of the OA, k=number of columns of the OA, t=strength of
+the OA, lambda=index of the OA)
+
+OA(16, 8, 2, 4) (unbalanced search space size: binom(2^16, 8) ~ 8.43e10^33 ; balanced search space size: binom(binom(16, 8), 8) ~ 1.86e10^29)
+OA(16, 8, 3, 2) (unbalanced search space size: binom(2^16, 8) ~ 8.43e10^33 ; balanced search space size: binom(binom(16, 8), 8) ~ 1.86e10^29)
+OA(16, 15, 2, 4) (unbalanced search space size: binom(2^16, 15) ~ 1.35e10^60 ; balanced search space size: binom(binom(16, 8), 15) ~ 3.34e10^49)
+
+
