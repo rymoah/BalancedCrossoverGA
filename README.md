@@ -1,6 +1,10 @@
 # BalancedCrossoverOperators
 
-Java code for testing GA balanced crossover operators
+GitHub repository for the source code and the experimental data of the paper:
+
+L. Manzoni, L. Mariot, E. Tuba: Balanced Crossover Operators in Genetic Algorithms (2019)
+
+which is currently available as a preprint on arXiv at <https://arxiv.org/abs/1904.10494>
 
 Compiling
 ---------
