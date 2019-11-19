@@ -1,4 +1,4 @@
-# BalancedCrossoverOperators
+# Balanced Crossover Operators for GA
 
 GitHub repository for the source code and the experimental data of the paper:
 
