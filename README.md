@@ -2,9 +2,7 @@
 
 GitHub repository for the source code and the experimental data of the paper:
 
-L. Manzoni, L. Mariot, E. Tuba: Balanced Crossover Operators in Genetic Algorithms (2019)
-
-which is currently available as a preprint on arXiv at <https://arxiv.org/abs/1904.10494>
+L. Manzoni, L. Mariot, E. Tuba: Balanced Crossover Operators in Genetic Algorithms. Swarm and Evolutionary Computation 54:100646 (2020) DOI: https://doi.org/10.1016/j.swevo.2020.100646 (postprint available at https://lucamariot.org/files/papers/mmt_swevo_2019_postprint.pdf)
 
 Compiling
 ---------
