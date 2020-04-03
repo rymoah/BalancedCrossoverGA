@@ -380,6 +380,34 @@ public class GeneticTools {
     }
     
     /**
+     * Create a population of generic boolean functions (with no constraints on
+     * their Hamming weight), with uniform probability.
+     * 
+     * @param length        length of the bitstring
+     * @param weight        target weight for the bitstring
+     * @param popsize       size of the population
+     * @param unbalanceP    probability of copying the wrong value
+     * @param shuffle       boolean flag to specify whether shuffling should be used or not
+     * @param genrand       a Random instance representing a pseudorandom generator
+     * @return 
+     */
+    public static boolean[][] createPartUnbalPop(int length, int weight, 
+            int popsize, double unbalanceP, boolean shuffle, Random genrand) {
+        
+        boolean[][] population = new boolean[popsize][];
+        
+        for(int i=0; i<popsize; i++) {
+            
+            population[i] = CombTools.createPartUnbalBitString(length, weight, 
+                    unbalanceP, shuffle, genrand);
+            
+        }
+        
+        return population;
+        
+    }
+    
+    /**
      * Create a population of binary matrices of size Nxk, with unbalanced columns.
      * 
      * @param popsize   size of the population

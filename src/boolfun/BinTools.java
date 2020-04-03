@@ -305,5 +305,54 @@ public class BinTools {
             return 0;
         
     }
+    
+    /**
+     * Compute the Hamming weight (=number of 1s) in a binary string
+     * 
+     * @param binstring     A boolean array representing a binary string
+     * @return              The Hamming weight of the binary string
+     */
+    public static int computeHW(boolean[] binstring) {
+        
+        int weight = 0;
+        
+        for(int i=0; i<binstring.length; i++) {
+            
+            if(binstring[i]) 
+                weight++;
+            
+        }
+        
+        return weight;
+        
+    }
+    
+    public static int computeHD(boolean[] binstring1, boolean[] binstring2) {
+        
+        int hd = 0;
+        
+        for(int i=0; i<binstring1.length; i++) {
+            if(binstring1[i] != binstring2[i]) {
+                hd++;
+            }
+        }
+        
+        return hd;
+        
+    }
+    
+    public static double computeAvgHD(boolean[] binstring, boolean[][] population) {
+        
+        double avghd = 0;
+        
+        for(int i=0; i<population.length; i++) {
+            avghd += computeHD(binstring, population[i]);
+        }
+        
+        avghd /= population.length;
+        
+        return avghd;
+        
+    }
 
 }

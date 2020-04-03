@@ -201,6 +201,92 @@ public class CombTools {
         
     }
     
+        /**
+     * Create a partially unbalanced binary string.
+     * After reaching the prescribed weight, with a certain probability the
+     * wrong value is still copied in the child, until the sampled random
+     * number is higher than the probability. At that point, only the
+     * complementary value is copied up to the end of the child. The method
+     * can be used both with the shuffling operation or not
+     * 
+     * @param length        length of the bitstring
+     * @param weight        target weight for the bitstring
+     * @param unbalanceP    probability of copying the wrong value
+     * @param shuffle       boolean flag to specify whether shuffling should be used or not
+     * @param genrand       a Random instance representing a pseudorandom generator
+     * @return 
+     */
+    public static boolean[] createPartUnbalBitString(int length, int weight, 
+            double unbalanceP, boolean shuffle, Random genrand) {
+        
+        boolean[] binstring = new boolean[length];
+        
+        int ocount = 0;     //counter for ones
+        int zcount = 0;     //counter for zeros
+        int complweight = length - weight;  //number of desired 0s in the bitstring
+
+        //Check whether shuffling must be applied
+        int[] positions = new int[binstring.length];
+        if (shuffle) {
+            positions = CombTools.randPerm(genrand, binstring.length);
+        } else {
+            for (int i = 0; i < binstring.length; i++) {
+                positions[i] = i;
+            }
+        }
+        
+        //While desired balancedness is not reached,
+        //select randomly one of the parents,
+        //and copy its i-th bit in the child's table.
+        int i = 0;
+        while (ocount != weight && zcount != complweight) {
+            
+            //Sample a random bit, copy it in the current position and update
+            //the relevant counter
+            boolean candval = genrand.nextBoolean();
+            binstring[positions[i]] = candval;
+            
+            if(candval) {
+                ocount++;
+            } else {
+                zcount++;
+            }
+            
+            i++;
+            
+        }     
+        
+        //If we have reached the prescribed number of 1s, put 1s with
+        //probability unbalanceP and after put only 0s. Else, do the reverse
+        //copy 0 with probability unbalanceP and after put only 1s).
+        if(ocount==weight) {
+            
+            while (genrand.nextFloat() < unbalanceP && i < binstring.length) {
+                binstring[positions[i]] = true;
+                i++;
+            }
+            while (i < binstring.length) {
+                binstring[positions[i]] = false;
+                i++;
+            }
+            
+        } else {
+            
+            while (genrand.nextFloat() < unbalanceP && i < binstring.length) {
+                binstring[positions[i]] = false;
+                i++;
+            }
+            while (i < binstring.length) {
+                binstring[positions[i]] = true;
+                i++;
+            }
+            
+        }
+        
+        return binstring;
+        
+    }
+    
     /**
      * Generate a balanced n-ary string where each symbol in {0,...,n-1}
      * occurs the same number of times.

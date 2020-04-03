@@ -137,6 +137,103 @@ public class CrossoverOperators {
     }
     
     /**
+     * Crossover operator for weighted balanced boolean function, based on the
+     * truth table representation and using counters, unbalancedness is allowed
+     * with a certain probability
+     *
+     * @param genrand A Random instance representing a pseudorandom generator.
+     * @param parent1 Binary representation of the first parent.
+     * @param parent2 Binary representation of the second parent.
+     * @param weigth Hamming weight, the number of ones of both parents and the
+     * child.
+     * @param shuffle Flag for shuffling positions of the child.
+     * @param unbalanceP A probability of introducing the unbalancedness.
+     * @return A boolean array representing the child produced by crossover.
+     */
+    public static boolean[] unbalancedCounterCrossWeighted(Random genrand,
+            boolean[] parent1, boolean[] parent2, int weight, boolean shuffle,
+            double unbalanceP) {
+
+        boolean[] child = new boolean[parent1.length];
+        
+        int ocount = 0;     //counter for ones
+        int zcount = 0;     //counter for zeros
+
+        int complweight = parent1.length - weight;
+
+        int[] positions = new int[parent1.length];
+        if (shuffle) {
+            positions = CombTools.randPerm(genrand, parent1.length);
+        } else {
+            for (int i = 0; i < parent1.length; i++) {
+                positions[i] = i;
+            }
+        }
+
+        //While desired balancedness is not reached,
+        //select randomly one of the parents,
+        //and copy its i-th bit in the child's table.
+        int i = 0;
+        while (ocount != weight && zcount != complweight) {
+
+            boolean candpar = genrand.nextBoolean();
+
+            if (!candpar) {
+
+                child[positions[i]] = parent1[i];
+
+                //Update the counters of 0s and 1s.
+                if (!parent1[i]) {
+                    zcount++;
+                } else {
+                    ocount++;
+                }
+
+            } else {
+
+                child[positions[i]] = parent2[i];
+
+                //Update the counters of 0s and 1s.
+                if (!parent2[i]) {
+                    zcount++;
+                } else {
+                    ocount++;
+                }
+
+            }
+            i++;
+        }
+
+        //If we have reached the prescribed number of 1s, 
+        //put 1s with probability unbalanceP and after put only 0s.
+        if (ocount == weight) {
+            while (genrand.nextDouble() < unbalanceP && i < child.length) {
+                child[positions[i]] = true;
+                i++;
+            }
+            while (i < child.length) {
+                child[positions[i]] = false;
+                i++;
+            }
+
+        } else {
+
+            //If we have reached one half of 0s, put only 1s.
+            //put 0s with probability unbalanceP and after put only 1s.
+            while (genrand.nextDouble() < unbalanceP && i < child.length) {
+                child[positions[i]] = false;
+                i++;
+            }
+            while (i < child.length) {
+                child[positions[i]] = true;
+                i++;
+            }
+
+        }
+        return child;
+    }
+    
+    /**
      * Search for an int value in a int vector, returning its position (-1 is
      * returned if it is not contained).
      * 
