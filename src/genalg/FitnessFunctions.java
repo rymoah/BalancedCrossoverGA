@@ -214,9 +214,24 @@ public class FitnessFunctions {
             //for weights 2 ... n/2 and add the sum of nonlinearities
             int[][] reswt = BoolTransf.resWalshTransforms(function, n, inmat);
             int[] nls = BoolTransf.compResNl(n, reswt, sizes);
-            for(int k=0; k<nls.length; k++) {
-                    fit += nls[k];
-            }
+            if(fitfun) {
+                    
+                    //Compute minimum nonlinearity
+                    fit = nls[0];
+                    for(int k=1; k<nls.length; k++) {
+                        if(nls[k]<fit) {
+                            fit = nls[k];
+                        }
+                    }
+                    
+                } else {
+                    
+                    //Compute sum of nonlinearities
+                    for(int k=0; k<nls.length; k++) {
+                        fit += nls[k];
+                    }
+                
+                }
             
         }
         

@@ -14,7 +14,7 @@ public class SteadyGAWPB {
         if(args.length != 10) {
             
             System.err.println("\nUsage: java genalg.SteadyGAWPB nvar popsize "
-                    + "fiteval freqprint tournsize mutprob crossop shuffle seed coolingparam unbalanceProb frequency unbal");
+                    + "fiteval fitfun freqprint tournsize mutprob crossop shuffle seed coolingparam unbalanceProb frequency unbal");
             System.err.println("\nwhere:");
             System.err.println("- nvar is the number of variables of the boolean functions");
             System.err.println("- popsize is the size of the population");
