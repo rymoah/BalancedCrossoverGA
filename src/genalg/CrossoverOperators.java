@@ -583,7 +583,7 @@ public class CrossoverOperators {
             
             case 3: {
                 
-                //Perform balanced crossover with zero-length encoding on the rows of transchild
+                //Perform balanced crossover with map-of-ones encoding on the rows of transchild
                 for(int i=0; i<transchild.length; i++) {
                     
                     transchild[i] = uniformOneMapCrossShuffle(genrand,
@@ -599,6 +599,107 @@ public class CrossoverOperators {
         
         //Finally, transpose the matrix to get the child
         child = transposeMatrix(transchild);
+        
+        return child;
+        
+    }
+    
+    /**
+     * Wrapper method for crossing over two WPB Boolean functions. Include also
+     * mutation step.
+     * 
+     * @param parent1   Binary representation of the first parent.
+     * @param parent2   Binary representation of the second parent.
+     * @param inmat     the three dimensional boolean inmat containing all
+                        input vectors in weightwise order
+     * @param crossop   integer identifier for the crossover operator to be used
+     * @param shuffle   Flag for shuffling positions of the child.   
+     * @param genrand   A Random instance representing a pseudorandom generator.
+     * @param pmut      Mutation probability
+     *
+     */
+    public static boolean[] crossoverWPB(boolean[] parent1, boolean[] parent2,
+            boolean[][][] inmat, int crossop, boolean shuffle, Random genrand,
+            double pmut) {
+        
+        int flength = parent1.length;
+        boolean[] child = new boolean[flength];
+        
+        if(crossop == 0) {
+            
+            //Particular case handled separately: generic functions crossed over with one-point
+            boolean[][] children = onePointCrossover(genrand, parent1, parent2);
+
+            //Since one-point crossover returns two children, randomly select one of them
+            if(genrand.nextBoolean()) {
+                child = children[1];
+            } else {
+                child = children[0];
+            }
+            
+            //Apply flip mutation
+            MutationOperators.flipMutation(genrand, child, pmut);
+            
+        } else {
+            
+            boolean[][][] wpart = new boolean[inmat.length][3][];        //3 for the second coordinate means one array for parent1, one for parent2, and one for the child
+            
+            //Loop over all weights
+            for(int k=0; k<inmat.length; k++) {
+                
+                //Copy the values of the two parents for weight k
+                wpart[k][0] = new boolean[inmat[k].length];
+                wpart[k][1] = new boolean[inmat[k].length];
+                for(int i=0; i<inmat[k].length; i++) {
+                    int index = BinTools.bin2Dec(inmat[k][i]);
+                    wpart[k][0][i] = parent1[index];
+                    wpart[k][1][i] = parent2[index];
+                }
+                
+                //Apply balanced crossover for wpart[k][2] (= f_(k))
+                int balweight = inmat[k].length/2;
+                switch(crossop) {
+                    
+                    case 1: {
+                        //Counter-based balanced crossover
+                        wpart[k][2] = balancedCounterCrossWeighted(genrand,
+                                wpart[k][0], wpart[k][1], balweight, shuffle);
+                        break;
+                    }
+                    
+                    case 2: {
+                        //Zero-length balanced crossover
+                        wpart[k][2] = balancedZeroLengthsCrossWeighted(genrand,
+                            wpart[k][0], wpart[k][1], balweight, shuffle);
+                        break;
+                    }
+                    
+                    case 3: {
+                        //Map-of-ones balanced crossover
+                        wpart[k][2] = uniformOneMapCrossShuffle(genrand,
+                            wpart[k][0], wpart[k][1], shuffle);
+                        break;
+                    }
+                    
+                }
+                
+                //Apply swap-based mutation for wpart[k][2] (= f_(k))
+                MutationOperators.swapMutationAll(genrand, child, pmut);
+                
+                //Set the truth table of the child for weight k
+                //Set the function value of each vector in E_{n,k}
+                for(int i=0; i<inmat[k].length; i++) {
+                    int x = BinTools.bin2Dec(inmat[k][i]);
+                    child[x] = wpart[k][2][i];
+                }
+
+            }
+            
+        }
+        
+        //Finally, set f(0)=0 and f(1)=1
+        child[0] = false;
+        child[1] = true;        
         
         return child;
         

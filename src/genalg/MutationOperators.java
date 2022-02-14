@@ -33,6 +33,35 @@ public class MutationOperators {
     }
     
     /**
+     * Classic flip-based mutation operator. For each position of the string, sample
+     * a random value in [0,1] with uniform probability and if it is less than
+     * the mutation probability flip the bit in that position
+     * 
+     * NOTICE: the difference from flipMutationAll() above is that in this case
+     * we are sampling *for each* position of the chromosome, rather than for
+     * a single one
+     * 
+     * @param genrand   Random number generator instance
+     * @param ttable    Boolean array to mutate
+     * @param pmut      Mutation probability
+     */
+    public static void flipMutationAll(Random genrand,
+            boolean[] ttable, double pmut) {
+        
+        for(int i=0; i<ttable.length; i++) {
+            
+            double ctoss = genrand.nextDouble();
+            if(ctoss <= pmut) {
+
+                ttable[i] = !ttable[i];
+
+            }
+       
+        }
+        
+    }
+    
+    /**
      * Swap-based mutation operator, to preserve the balancedness of a 
      * bitstring (truth table). Sample a random value [0,1] with uniform
      * probability. If the sampled number is less than the mutation probability,
@@ -63,7 +92,51 @@ public class MutationOperators {
         }
         
     }
-
+    
+    /**
+     * Swap-based mutation operator. For each position of the string, sample
+     * a random value in [0,1] with uniform probability and if it is less than
+     * the mutation probability swap the value in the position with another
+     * complementary value contained at another position.
+     * 
+     * NOTICE: the difference from swapMutation() above is that in this case
+     * we are sampling *for each* position of the chromosome, rather than for
+     * a single one
+     * 
+     * @param genrand   Random number generator instance
+     * @param ttable    Boolean array to mutate
+     * @param pmut      Mutation probability 
+     */
+    public static void swapMutationAll(Random genrand, boolean[] ttable,
+            double pmut) {
+        
+        //Build the map of ones and zeros of the table and randomly select
+        //two positions to be swapped from them
+        Vector<Integer> omap = BoolFunReps.buildOnesMap(ttable);
+        Vector<Integer> zmap = BoolFunReps.buildZerosMap(ttable);
+        
+        for(int i=0; i<omap.capacity(); i++) {
+            
+            if(genrand.nextDouble() < pmut) {
+                
+                //Swap current 1 position with a 0 position selected at random
+                int oind = i;
+                int oval = omap.elementAt(oind);
+                int zind = genrand.nextInt(zmap.capacity());
+                int zval = zmap.elementAt(zind);
+                ttable[oval] = false;
+                ttable[zval] = true;
+                
+                //Update maps
+                omap.set(oind, zval);
+                zmap.set(zind, oval);
+                
+                
+            }
+            
+        }
+        
+    }
     
     /**
      * Wrapper for mutation operator over binary matrices for the OA problem.

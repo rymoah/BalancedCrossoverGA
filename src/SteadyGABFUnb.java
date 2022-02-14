@@ -103,7 +103,7 @@ public class SteadyGABFUnb {
         System.out.println("Average fitness in initial population: "+avgf);
         System.out.println("Best initial individual: Function "+BinTools.bin2DecBig(population[bestpos]));
         System.out.println("Best initial individual HW: "+BinTools.computeHW(population[bestpos]));
-        System.out.println("Average HW in final population: "+avghw);
+        System.out.println("Average HW in initial population: "+avghw);
         
         System.out.println("Generation\tBest fit\tAvg fit\tBest HW\tavgHW");
        

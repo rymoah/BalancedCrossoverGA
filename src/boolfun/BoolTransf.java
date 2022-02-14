@@ -76,4 +76,127 @@ public class BoolTransf {
 
     }
     
+    /**
+     * Compute the Walsh transform of an n-variable boolean function over the
+     * restricted set of inputs E_{n,k}, for all k in {2..n/2}. The method
+     * computes a matrix whose rows are the indexed by the coefficients a in
+     * F_2^n, while the columns represent the weight restrictions k in {2..n/2}
+     * The last row contains the maximum absolute values (for computing the
+     * restricted nonlinearities later).
+     * 
+     * NOTE: each W_f_(k)(a) is computed with the naive algorithm, since the
+     * fast Walsh transform cannot be applied in this case
+     * 
+     * TODO: is it possible to make it more efficient? One straightforward
+     * improvement would be to parallelize at the level of the weights k, since
+     * the columns of the matrix are computed independently from one another.
+     * 
+     * @param function  the truth table of a boolean function of n variables
+     * @param n         the number of variables of the boolean function
+     * @param inmat     the three dimensional boolean inmat containing all
+                        input vectors in weightwise order
+     * @return 
+     */
+    public static int[][] resWalshTransforms(boolean[] function, int n, 
+            boolean[][][] inmat) {
+        
+        int[][] reswt = new int[function.length+1][n/2-1];
+        
+        //Main cycle: loop over all 2^n binary coefficients a in F_2^n
+        for(int a = 0; a<function.length; a++) {
+            
+            boolean[] bina = BinTools.dec2BinMod(a, n);
+            
+            //loop over all weights k in {2..n/2}
+            for(int k=2; k<=(n/2); k++) {
+            
+                //loop over all inputs in E_{n,k}
+                for(int x=0; x<inmat[k-2].length; x++) {
+                    
+                    //Evaluate the term (-1)^{f(x) XOR a.x}
+                    boolean fx = function[BinTools.bin2Dec(inmat[k-2][x])];
+                    boolean dotp = BinTools.scalarProduct(bina, inmat[k-2][x]);
+                    if(fx ^ dotp) {
+                        reswt[a][k-2]--;
+                    } else {
+                        reswt[a][k-2]++;
+                    }
+                    
+                }
+                
+                //Update maximum absolute value for W_f_k
+                if(Math.abs(reswt[a][k-2]) > reswt[function.length][k-2]) {
+                    reswt[function.length][k-2] = Math.abs(reswt[a][k-2]);
+                }
+                
+            }
+            
+        }
+        
+        return reswt;
+        
+    }
+    
+    /**
+     * Compute the unbalancedness of the weightwise restrictions of a boolean
+     * function.
+     * 
+     * @param n         number of variable of the function
+     * @param function  truth table of the boolean function
+     * @param inmat     the three dimensional boolean inmat containing all
+                        input vectors in weightwise order
+     * @param sizes     sizes of the sets E_{n,k}
+     * @return 
+     */
+    public static int[] compResUnb(int n, boolean[] function, boolean[][][] inmat,
+            int[] sizes) {
+        
+        int[] unb = new int[n-1];
+        
+        for(int k=0; k<n-1; k++) {
+            
+            int sizein = sizes[k+1];
+            //System.out.print("sizein: "+sizein);
+            int weight = 0;
+            //compute the weight of the k-th restriction
+            for(int x=0; x<inmat[k].length; x++) {
+                int decx = BinTools.bin2Dec(inmat[k][x]);
+                if(function[decx]) {
+                    weight++;
+                }
+            }
+            //Compute unbalancedness as the deviation from |E_{n,k}|/2
+            unb[k] = Math.abs((sizein/2) - weight); 
+            //System.out.println(" Balanced weight "+(k+1)+": "+(sizein/2)+" Weight: "+weight);
+            
+        }
+        
+        return unb;
+        
+    }
+    
+    /**
+     * Compute the restricted nonlinearities of a Boolean function, given the
+     * weightwise restrictions of the Walsh transform
+     * @param n     number of variables of the function
+     * @param reswt weightwise restricted Walsh transforms. Last row contains 
+     *              the maximum absolute values
+     * @param sizes sizes of the sets E_{n,k}
+     * @return 
+     */
+    public static int[] compResNl(int n, int[][] reswt, int[] sizes) {
+        
+        int[] nls = new int[(n/2)-1];
+        
+        for(int k=2; k<=(n/2); k++) {
+            
+            //Use last row of the Walsh table to get the maximum abs value
+            int sizein = sizes[k];    //sizes of E_{n,k} starts from weight k=1, that's why we take k-1 instead of k-2 here
+            nls[k-2] = (sizein / 2) - (reswt[reswt.length-1][k-2] / 2);
+        }
+        
+        return nls;
+        
+    }
+    
 }

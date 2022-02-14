@@ -34,7 +34,47 @@ public class CombTools {
     }
     
     /**
-     * Computes the binomial coefficient (n,k).
+     * Compute all binomial coefficients (n,k) with k in {0,...n}. This is
+     * done by computing the (n+1)-th row of Pascal's triangle
+     * 
+     * @param n         the size of the set from which combinations are drawn.
+     * @return 
+     */
+    public static int[] allBinCoeffs(int n) {
+        
+        int[][] pascal = new int[2][]; //Keep only two rows of the triangle, for memory efficiency
+        pascal[0] = new int[1];
+        pascal[0][0] = 1;              //Initialize the vertex of the triangle
+        
+        for(int i=1; i<=n; i++) {
+            
+            //Size of the next row is the size of the previous row +1
+            pascal[1] = new int[i+1];
+            //Initialize left and right extremes at 1
+            pascal[1][0] = 1;           
+            pascal[1][i] = 1;
+            
+            if(i>1) {
+                //Compute each remaining element as the sum of the previous two in row 0
+                for(int j=1; j<i; j++) {
+                    pascal[1][j] = pascal[0][j-1] + pascal[0][j];
+                }
+            }
+            
+            //Update rows
+            pascal[0] = pascal[1];
+            
+        }
+        
+        return pascal[1];
+        
+    }
+    
+    /**
+     * Computes the binomial coefficient (n,k) using Pascal's triangle.
+     * 
+     * NOTICE: the smallest input where this overflows (because of int return
+     * type) is n=34 and k=17
      * 
      * @param n         the size of the set from which combinations are drawn.
      * @param k         the size of the combinations.
@@ -42,16 +82,9 @@ public class CombTools {
      */
     public static int binCoeff(int n, int k) {
         
-        long numerator = 1;
-        
-        for(int i=n-k+1; i<=n; i++) {
-            numerator *= i;
-        }
-        
-        long denominator = factorial(k);
-        int bCoeff = (int)(numerator/denominator);
-        
-        return bCoeff;
+        //Construct the row of Pascal's triangle corresponding to n and return
+        //the k-th element in it
+        return(allBinCoeffs(n)[k]);
         
     }
     
@@ -110,6 +143,87 @@ public class CombTools {
         
         return combset;
       
+    }
+    
+    /**
+     * Generates all the (s+t)-bit strings with Hamming weight t, in binary
+     * notation. The algorithm is described in Knuth, "The Art of Computer
+     * Programming, pre-Fascicle 3A" (Algorithm L, p. 4).
+     * 
+     * NOTICE: we pass the binomial coefficient as a parameter for efficiency
+     * reasons.
+     * 
+     * @param s         number of 0s in the bitstrings
+     * @param t         number of 1s in the bitstrings
+     * @param size      binomial coefficient (s+t, t)
+     * @return combset  array of integers representing the bitstrings of length
+     *                  (s+t) and Hamming weight t
+     */
+    public static boolean[][] genBinCombsBin(int s, int t, int size) {
+
+        boolean[][] combset = new boolean[size][];
+        
+        int index = 0; //index for the set combs.
+        
+        //Initialisation
+        int[] comb = new int[t+2]; //the two additional cells are sentinels.
+        for(int j=0; j<t; j++) {
+            comb[j] = j;
+        }
+        comb[t] = s+t;
+        comb[t+1] = 0;
+        
+        int j = 0;
+        
+        while(j<t) {
+            
+            boolean[] conf = new boolean[s+t];
+            
+            for(int k=0; k<t; k++) {
+                conf[(s+t)-1-comb[k]] = true;
+            }
+            
+            //Copy the combination in the final set.
+            combset[index] = conf;
+            index++;            
+            
+            j=0;
+            while((comb[j]+1)==comb[j+1]) {
+                comb[j] = j;
+                j++;
+            }
+            
+            if(j<t) {
+                comb[j]++;
+            }
+            
+        }
+        
+        return combset;
+      
+    }
+    
+    /**
+     * Generate the three-dimensional inmat containing all input vectors in
+     * F_2^n (excluding 0..0 and 1..1) in increasing Hamming weight order.
+     * 
+     * @param n         Vector space dimension
+     * @param bincoeffs vector of binomial coefficients (n,k)
+     * @return 
+     */
+    public static boolean[][][] genBinCombsMatrix(int n, int[] bincoeffs) {
+        
+        //The number of weights to be considered is n-1 (from 1 to n-1)
+        boolean[][][] matrix = new boolean[n-1][][];
+        
+        //Fill the inmat by calling genBinCombsBin with increasing (respectively,
+        //decreasing) values of 1s (respectively, 0s)
+        for(int i=0; i<matrix.length; i++) {
+            matrix[i] = genBinCombsBin(n-i-1, i+1, bincoeffs[i+1]);
+        }
+        
+        return matrix;
+        
     }
     
     /**
@@ -403,6 +517,40 @@ public class CombTools {
             }            
         }
         return vect;
+    }
+    
+    /**
+     * Generate the truth table of a random WPB function of n variables, with
+     * f(0)=0 and f(1)=1.
+     * 
+     * @param flength   length of the boolean function (2^n)
+     * @param inmat     the three dimensional boolean inmat containing all
+                        input vectors in weightwise order
+     * @param gen       random number generator
+     * @return 
+     */
+    public static boolean[] genRandomWPBFunction(int flength, 
+            boolean[][][] inmat, Random gen) {
+        
+        boolean[] function = new boolean[flength];
+        
+        //Loop over all weights
+        for(int k=0; k<inmat.length; k++) {
+            //Generate a balanced string of length bincoeff(n,k)
+            boolean[] balstr = genBalancedBinaryString(gen, inmat[k].length);
+            //Set the function value of each vector in E_{n,k}
+            for(int i=0; i<inmat[k].length; i++) {
+                int x = BinTools.bin2Dec(inmat[k][i]);
+                function[x] = balstr[i];
+            }
+        }
+        
+        //Set f(0)=0 and f(1) = 1
+        function[0] = false;
+        function[flength-1] = true;
+        
+        return function;
+        
     }
     
 }

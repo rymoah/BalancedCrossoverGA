@@ -147,6 +147,83 @@ public class FitnessFunctions {
         
     }
     
+    /**
+     * Compute the fitness function for the Weightwise Perfectly Balanced (WPB)
+     * Boolean function problem.
+     * 
+     * @param n         number of variables
+     * @param function  truth table of the boolean function
+     * @param inmat     the three dimensional boolean inmat containing all
+                        input vectors in weightwise order
+     * @param sizes     sizes of the sets E_{n,k}
+     * @param unbflag   flag used to specify whether the unbalancedness penalty
+     *                  should be incorporated (true) or not (false). Useful
+     *                  when computing the fitness with balanced GA
+     * @param fitfun    specifies which fitness function to use for nonlinearity
+     *                  (false: sum, true: min)
+     * @return 
+     */
+    public static double compFitnessWPBFunc(int n, boolean[] function, 
+            boolean[][][] inmat, int[] sizes, boolean unbflag, boolean fitfun) {
+        
+        double fit = 0.0;
+        
+        if(unbflag) {
+            
+            //Take into account unbalancedness
+            int[] unb = BoolTransf.compResUnb(n, function, inmat, sizes);
+            int pen = 0;
+            for(int k=0; k<unb.length; k++) {
+                pen += unb[k];
+            }
+            
+            //If the function is WPB, then compute the restricted Walsh transforms
+            //for weights 2 ... n/2 and add the sum of nonlinearities
+            if(pen==0) {
+                
+                int[][] reswt = BoolTransf.resWalshTransforms(function, n, inmat);
+                int[] nls = BoolTransf.compResNl(n, reswt, sizes);
+                
+                if(fitfun) {
+                    
+                    //Compute minimum nonlinearity
+                    fit = nls[0];
+                    for(int k=1; k<nls.length; k++) {
+                        if(nls[k]<fit) {
+                            fit = nls[k];
+                        }
+                    }
+                    
+                } else {
+                    
+                    //Compute sum of nonlinearities
+                    for(int k=0; k<nls.length; k++) {
+                        fit += nls[k];
+                    }
+                
+                }
+                
+            } else {
+                fit = -pen;
+            }
+            
+        } else {
+            
+            //If we don't care about the penalty factor, it means we always
+            //have a WPB function, hence compute the restricted Walsh transforms
+            //for weights 2 ... n/2 and add the sum of nonlinearities
+            int[][] reswt = BoolTransf.resWalshTransforms(function, n, inmat);
+            int[] nls = BoolTransf.compResNl(n, reswt, sizes);
+            for(int k=0; k<nls.length; k++) {
+                    fit += nls[k];
+            }
+            
+        }
+        
+        return fit;
+        
+    }
+    
     /*---------------------------------------------------------------------------------------*/
     /* THE METHODS BELOW ITERATE THE THREE FITNESS FUNCTIONS OVER POPULATIONS OF INDIVIDUALS */
     /*---------------------------------------------------------------------------------------*/
@@ -217,6 +294,38 @@ public class FitnessFunctions {
         for(int i=0; i<population.length; i++) {
             
             fitnesses[i] = compFitnessOA(population[i], t, lambda, p);
+            
+        }
+        
+        return fitnesses;
+        
+    }
+    
+    /**
+     * Compute the fitness of a population of boolean functions for the WPB
+     * problem (ie, iterates the method compFitnessWPBFunc() over an array of
+     * boolean arrays).
+     * 
+     * @param population    a boolean matrix containing the boolean functions in the population
+     * @param n             number of variables of the functions
+     * @param inmat         the three dimensional boolean inmat containing all
+                            input vectors in weightwise order
+     * @param sizes         sizes of the sets E_{n,k}
+     * @param unbal         unbalancedness flag for fitness function
+     * @param fitfun        specifies which fitness function to use for nonlinearity
+     *                      (false: sum, true: min)
+     * @return              an array of fitness, one for each function in the population
+     */
+    public static double[] compFitnessWPBFuncPop(boolean[][] population,
+            int n, boolean[][][] inmat, int[] sizes, boolean unbal, 
+            boolean fitfun) {
+        
+        double[] fitnesses = new double[population.length];
+        
+        for(int i=0; i<population.length; i++) {
+            
+            fitnesses[i] = compFitnessWPBFunc(n, population[i], inmat, sizes,
+                    unbal, fitfun);
             
         }
         

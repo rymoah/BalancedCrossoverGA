@@ -438,4 +438,29 @@ public class GeneticTools {
         
     }
     
+    /**
+     * Create a population of WPB boolean functions
+     * 
+     * @param flength   length of the truth table of the boolean functions
+     * @param popsize   size of the population
+     * @param inmat     the three dimensional boolean inmat containing all
+                        input vectors in weightwise order
+     * @param genrand   a Random instance representing a pseudorandom generator   
+     * @return 
+     */
+    public static boolean[][] createWPBPop(int flength, int popsize, 
+            boolean[][][] inmat, Random genrand) {
+        
+        boolean[][] population = new boolean[popsize][];
+        
+        for(int i=0; i<popsize; i++) {
+            
+            population[i] = CombTools.genRandomWPBFunction(flength, inmat, genrand);
+            
+        }
+        
+        return population;
+        
+    }
+    
 }

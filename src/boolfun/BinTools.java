@@ -306,6 +306,26 @@ public class BinTools {
         
     }
     
+    /** Compute the scalar product between two boolean vectors-
+     * 
+     * @param vect1
+     * @param vect2
+     * @return 
+     */
+    public static boolean scalarProduct(boolean[] vect1, boolean[] vect2) {
+        
+        boolean prod = false;
+        
+        for(int i=0; i<vect2.length; i++) {
+            
+            prod ^= vect1[i] && vect2[i];
+            
+        }
+        
+        return prod;
+        
+    }
+    
     /**
      * Compute the Hamming weight (=number of 1s) in a binary string
      * 
