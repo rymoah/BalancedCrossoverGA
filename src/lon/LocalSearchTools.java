@@ -10,6 +10,9 @@ public class LocalSearchTools {
     void test(){
         int a = 5;
         System.out.println("Test "+a);
+        
+        System.out.println("CIAO! :-)");
+        
     }
     
 }
