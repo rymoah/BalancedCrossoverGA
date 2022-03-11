@@ -5,13 +5,120 @@ package lon;
  * solutions with fixed Hamming weights.
  * 
  */
+
+import boolfun.*;
+import genalg.*;
+
 public class LocalSearchTools {
     
-    void test(){
-        int a = 5;
-        System.out.println("Test "+a);
+    /**
+     * Update the Walsh transform of a Boolean function in an efficient way
+     * when two bit positions y,z in the truth table are swapped.
+     * 
+     * @param function  truth table of the function
+     * @param walsht    Walsh transform of the function
+     * @param nvar      number of variables
+     * @param y         position of the first bit in the truth table to swap
+     * @param z         position of the second bit in the truth table to swap
+     * @return 
+     */
+    public static int[] updateWHTSwap(boolean[] function, int[] walsht,
+            int nvar, int y, int z) {
         
-        System.out.println("CIAO! :-)");
+        int[] upwalsht = new int[walsht.length];
+        
+        //Convert y and z in binary to compute scalar products in the loop
+        boolean[] biny = BinTools.dec2BinMod(y, nvar);
+        boolean[] binz = BinTools.dec2BinMod(z, nvar);
+        
+        //Compute the term (-1)^f(z) - (-1)^f(y) which is constant in updating
+        //all Walsh coefficients
+        int polfy = 0;
+        if(function[y]) {
+            polfy = -1;
+        } else {
+            polfy = 1;
+        }
+        int polfz = 0;
+        if(function[z]) {
+            polfz = -1;
+        } else {
+            polfz = 1;
+        }
+        int deltaf = polfz - polfy;
+        
+        //Main loop: go over all 2^nvar Walsh coefficients
+        for(int a=0; a<walsht.length; a++) {
+            
+            boolean[] bina = BinTools.dec2BinMod(a, nvar);
+            boolean ay = BinTools.scalarProduct(bina, biny);
+            int polay = 0;
+            if(ay) {
+                polay = -1;
+            } else {
+                polay = 1;
+            }
+            boolean az = BinTools.scalarProduct(bina, binz);
+            int polaz = 0;
+            if(az) {
+                polaz = -1;
+            } else {
+                polaz = 1;
+            }
+            
+            //Compute the updated term as wt[a] + delta, with
+            //delta = [(-1)^f(z) - (-1)^f(y)] * [(-1)^ay - (-1)^az]
+            upwalsht[a] = walsht[a] + (deltaf * (polay - polaz));
+            
+        }
+        
+        return upwalsht;
+        
+    }
+    
+    //Test main
+    public static void main(String[] args) {
+        
+        //f(x1,x2,x3) = x1 XOR x2 XOR x2
+        boolean[] function = {false, true, true, false, true, false, false, true};
+        int nvar = 3;
+        
+        //Walsh transform
+        int[] walsht = BinTools.bin2Pol(function);
+        int sprad = BoolTransf.calcFWT(walsht, 0, walsht.length);
+        
+        //Fitness evaluation (nonlinearity only, the function is balanced)
+        double fitness = FitnessFunctions.compFitnessBFGlob(walsht, nvar, false);
+        
+        //Swap two positions y and z and update Walsh transform
+        int y = 3;
+        int z = 7;
+        int[] upwalsht = updateWHTSwap(function, walsht, nvar, y, z);
+        double upfitness = FitnessFunctions.compFitnessBFGlob(upwalsht, nvar, false);
+        
+        //Update truth table
+        boolean[] upfunction = new boolean[function.length];
+        System.arraycopy(function, 0, upfunction, 0, function.length);
+        boolean temp = upfunction[y];
+        upfunction[y] = upfunction[z];
+        upfunction[z] = temp;
+        
+        //Compute from scratch Walsh transform for double-check (UpWalsh*)
+        int[] upwalsht1 = BinTools.bin2Pol(upfunction);
+        BoolTransf.calcFWT(upwalsht1, 0, upwalsht.length);
+        double upfitness1 = FitnessFunctions.compFitnessBFGlob(upwalsht1, nvar, false);
+        
+        //print results
+        System.out.println("x\tf(x)\tWalsh\tf'(x)\tUpWalsh\tUpWalsh*");
+        for(int i=0; i<walsht.length; i++) {
+            System.out.println(BinTools.bool2Bin(BinTools.dec2BinMod(i, nvar))+
+                    "\t"+BinTools.singleBool2Bin(function[i])+
+                    "\t"+walsht[i]+"\t"+BinTools.singleBool2Bin(upfunction[i])+
+                    "\t"+upwalsht[i]+"\t"+upwalsht1[i]);
+        }
+        System.out.println("\nfit(f) = "+fitness);
+        System.out.println("fit(f') = "+upfitness);
+        System.out.println("fit(f')* = "+upfitness1);
         
     }
     

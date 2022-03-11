@@ -22,7 +22,7 @@ public class FitnessFunctions {
      */
     public static double compFitnessBF(boolean[] function, int nvar, boolean unbal) {
         
-        double fitness;
+        double fitness = 0.0;
         
         //Step 1: convert the truth table in polar form (0 -> 1, 1 -> -1)
         int[] poltable = BinTools.bin2Pol(function);
@@ -44,6 +44,62 @@ public class FitnessFunctions {
             //No need to compute unbalancedness from scratch, the value
             //is the first coefficient in absolute value of the Walsh transform
             int unb = Math.abs(poltable[0]);
+            fitness = nl - unb;
+            
+        } else {
+            
+            fitness = nl;
+            
+        }
+        
+        return fitness;
+        
+    }
+    
+    /**
+     * Find the maximum absolute value of the Walsh transform of a boolean function
+     * 
+     * @param walsht    Walsh transform of the function
+     * @return 
+     */
+    public static int findSpectralRadius(int[] walsht) {
+        
+        int sprad = 0;
+        for(int i=0; i<walsht.length; i++) {
+            if(Math.abs(walsht[i]) > sprad) {
+                sprad = Math.abs(walsht[i]);
+            }
+        }
+        
+        return sprad;
+        
+    }
+    
+    /**
+     * Compute the fitness of a boolean function. Same as compFitnessBF(), but
+     * with spectral radius and walsh transform passed as external parameters.
+     * 
+     * @param walsht    Walsh transform of the function
+     * @param nvar      number of variables of the boolean function
+     * @param unbal     flag for specifying if unbalancedness must be considered
+     * @return          the value of nonlinearity of the boolean function
+     */
+    public static double compFitnessBFGlob(int[] walsht, int nvar, boolean unbal) {
+        
+        double fitness = 0.0;
+        
+        //Step 1: find spectral radius and compute the nonlinearity, and set it
+        //as the function fitness
+        int sprad = findSpectralRadius(walsht);
+        int nl = BoolTransf.calcNL(sprad, nvar);
+        
+        //Step 2: if unbal is set, subtract it from the nonlinearity to compute
+        //the fitness function. Otherwise, use only nonlinearity
+        if(unbal) {
+            
+            //No need to compute unbalancedness from scratch, the value
+            //is the first coefficient in absolute value of the Walsh transform
+            int unb = Math.abs(walsht[0]);
             fitness = nl - unb;
             
         } else {
@@ -90,6 +146,41 @@ public class FitnessFunctions {
         for (int i = start; i < poltable.length; i++) {
 
             fitness+=(bentcoeff-Math.abs(poltable[i]))*(bentcoeff-Math.abs(poltable[i]));
+            
+        }
+        
+        return Math.sqrt(fitness);
+        
+    }
+    
+    /**
+     * Compute the fitness of a boolean function for the bent function problem.
+     * fit(f)=sqrt(sum_(w \in F) (2^(nvar/2)-|Wf(w)|)^2)
+     * Same as compFitnessBent(), but with the walsh transform passed as an 
+     * external parameter.
+     * 
+     * @param function          a boolean function of nvar variables
+     * @param nvar              number of variables of the boolean functions (must be even)
+     * @param unbal             flag for specifying if unbalancedness must be considered
+     * @return                  an array of fitnesses, one for each function in the population 
+     */
+    public static double compFitnessBentGlob(boolean[] function, int[] walsht,
+            int nvar, boolean unbal) {
+        
+        double fitness = 0.0;
+        double bentcoeff = Math.pow(2,nvar/2);
+        
+        //If unbalancedness must be considered, start the for loop from 0, otherwise from 1
+        int start = 0;
+        if(!unbal) {
+            start = 1;
+        }
+        
+        //Step 3: compute the fitness function: fit(function)=sqrt(sum_(w \in F) (2^(nvar/2)-|Wf(w)|)^2)
+        //Loop over the Walsh Transform of the function
+        for (int i = start; i < walsht.length; i++) {
+
+            fitness+=(bentcoeff-Math.abs(walsht[i]))*(bentcoeff-Math.abs(walsht[i]));
             
         }
         
