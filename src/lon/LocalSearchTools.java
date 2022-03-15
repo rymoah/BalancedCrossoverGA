@@ -8,8 +8,72 @@ package lon;
 
 import boolfun.*;
 import genalg.*;
+import java.util.Arrays;
+
+//class for the structure that saves function, its walsh transform and fitness function value
+class SearchSolution{
+    boolean[] function;
+    int[] walsht;
+    double fitness;
+    int nvar;
+
+    public SearchSolution(int nvar) {
+        int n = (int)Math.pow(2,nvar);
+        function = new boolean[n];
+        walsht = new int[n];
+        fitness = 0;        
+    }
+    
+    public SearchSolution(boolean[] function, int[] walsht, double fitness, int nvar) {
+        int n = (int)Math.pow(2,nvar);
+        System.arraycopy(function,0,this.function,0,n);
+        System.arraycopy(walsht,0,this.walsht,0,n);
+        this.fitness = fitness;
+        this.nvar = nvar;
+    }
+    
+    public void updateFunction(boolean[] function, int[] walsht, double fitness){
+        int n = function.length;
+        System.arraycopy(function,0,this.function,0,n);
+        System.arraycopy(walsht,0,this.walsht,0,n);
+        this.fitness = fitness;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SearchSolution other = (SearchSolution) obj;
+        if (Double.doubleToLongBits(this.fitness) != Double.doubleToLongBits(other.fitness)) {
+            return false;
+        }
+        if (this.nvar != other.nvar) {
+            return false;
+        }
+        if (!Arrays.equals(this.function, other.function)) {
+            return false;
+        }
+        if (!Arrays.equals(this.walsht, other.walsht)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+}
 
 public class LocalSearchTools {
+    
+    /*public static int[] swap(boolean[] function, int y, int z){
+        
+    }*/
     
     /**
      * Update the Walsh transform of a Boolean function in an efficient way
@@ -74,6 +138,70 @@ public class LocalSearchTools {
         
         return upwalsht;
         
+    }
+    
+    /**
+     * Generate and evaluate the neighborhood solutions
+     * 
+     * @param function  truth table of the function
+     * @param fitness   fitness function value for the function
+     * @param walsht    Walsh transform of the function
+     * @param nvar      number of variables
+     * @return 
+     */
+    public static SearchSolution theBestNeighbor(boolean[] function, double fitness, 
+            int[] walsht, int nvar) {
+        
+        SearchSolution best = new SearchSolution(function, walsht, fitness, nvar);
+        int n=function.length;
+        boolean[] tempFunction = new boolean[n];
+        
+        //genereting all neighboors
+        for (int i = 0; i < n; i++) {
+            for (int j = i+1; j < n; j++) {
+                //swap only if the elements are different
+                System.arraycopy(function, 0, tempFunction, 0, n);
+                if(function[i]!=function[j]){
+                    //swap i and j
+                    tempFunction[i] = !tempFunction[i];
+                    tempFunction[j] = !tempFunction[j];
+                    //evaluate new solution
+                    int[] upwalsht = updateWHTSwap(function, walsht, nvar, i, j);
+                    double upfitness = FitnessFunctions.compFitnessBFGlob(upwalsht, nvar, false);
+                    
+                    //check if the new solution is better 
+                    //save the better one
+                    if(upfitness>fitness){
+                         best.updateFunction(tempFunction, upwalsht, upfitness);
+                    }
+                }
+            }
+            
+        }
+        
+        return best;
+    }
+    
+    /**
+     * Downhill method that uses function theBestNeighbor
+     * 
+     * @param function  truth table of the function
+     * @param fitness   fitness function value for the function
+     * @param walsht    Walsh transform of the function
+     * @param nvar      number of variables
+     * @return 
+     */
+    public static boolean[] downHill(boolean[] function, double fitness, 
+            int[] walsht, int nvar){
+        
+        SearchSolution best = new SearchSolution(function, walsht, fitness, nvar);
+        SearchSolution temp = new SearchSolution(nvar);
+        do{
+            temp.updateFunction(best.function, best.walsht, best.fitness);
+            best = theBestNeighbor(best.function, best.fitness, best.walsht, nvar);
+        }while(!temp.equals(best));
+        
+        return best.function;
     }
     
     //Test main
