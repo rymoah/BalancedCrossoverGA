@@ -26,6 +26,8 @@ class SearchSolution{
     
     public SearchSolution(boolean[] function, int[] walsht, double fitness, int nvar) {
         int n = (int)Math.pow(2,nvar);
+        this.function = new boolean[n];
+        this.walsht = new int[n];
         System.arraycopy(function,0,this.function,0,n);
         System.arraycopy(walsht,0,this.walsht,0,n);
         this.fitness = fitness;
@@ -149,7 +151,7 @@ public class LocalSearchTools {
      * @param nvar      number of variables
      * @return 
      */
-    public static SearchSolution theBestNeighbor(boolean[] function, double fitness, 
+    public static SearchSolution findBestNeighbor(boolean[] function, double fitness, 
             int[] walsht, int nvar) {
         
         SearchSolution best = new SearchSolution(function, walsht, fitness, nvar);
@@ -183,7 +185,7 @@ public class LocalSearchTools {
     }
     
     /**
-     * Downhill method that uses function theBestNeighbor
+     * Hill-climbing method that uses function findBestNeighbor
      * 
      * @param function  truth table of the function
      * @param fitness   fitness function value for the function
@@ -191,17 +193,17 @@ public class LocalSearchTools {
      * @param nvar      number of variables
      * @return 
      */
-    public static boolean[] downHill(boolean[] function, double fitness, 
+    public static SearchSolution hillClimb(boolean[] function, double fitness, 
             int[] walsht, int nvar){
         
         SearchSolution best = new SearchSolution(function, walsht, fitness, nvar);
         SearchSolution temp = new SearchSolution(nvar);
         do{
             temp.updateFunction(best.function, best.walsht, best.fitness);
-            best = theBestNeighbor(best.function, best.fitness, best.walsht, nvar);
-        }while(!temp.equals(best));
+            best = findBestNeighbor(best.function, best.fitness, best.walsht, nvar);
+        }while(temp.fitness != best.fitness);
         
-        return best.function;
+        return best;
     }
     
     //Test main
@@ -247,6 +249,17 @@ public class LocalSearchTools {
         System.out.println("\nfit(f) = "+fitness);
         System.out.println("fit(f') = "+upfitness);
         System.out.println("fit(f')* = "+upfitness1);
+        
+        //simple test for hill climbing
+        SearchSolution locopt = new SearchSolution(nvar);
+        locopt = hillClimb(function, fitness, walsht, nvar);
+        System.out.println("");
+        System.out.println("x\tf'(x)");
+        for(int i=0; i<walsht.length; i++) {
+            System.out.println(BinTools.bool2Bin(BinTools.dec2BinMod(i, nvar))+
+                    "\t"+BinTools.singleBool2Bin(locopt.function[i]));
+        }
+        System.out.println("fit(f') = "+locopt.fitness);
         
     }
     

@@ -174,6 +174,8 @@ public class SteadyGABF {
                 MutationOperators.swapMutation(genrand, child, mutprob);
             }
             
+            
+            
             //Step 2d: Evaluate child's fitness and apply elitist replacement
             double fitchild = FitnessFunctions.compFitnessBF(child, nvar, false);
             if((fitchild > fitnesses[candpos[0]]) || (fitchild > fitnesses[candpos[1]])) {
