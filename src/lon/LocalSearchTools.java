@@ -251,8 +251,7 @@ public class LocalSearchTools {
         System.out.println("fit(f')* = "+upfitness1);
         
         //simple test for hill climbing
-        SearchSolution locopt = new SearchSolution(nvar);
-        locopt = hillClimb(function, fitness, walsht, nvar);
+        SearchSolution locopt = hillClimb(function, fitness, walsht, nvar);
         System.out.println("");
         System.out.println("x\tf'(x)");
         for(int i=0; i<walsht.length; i++) {
