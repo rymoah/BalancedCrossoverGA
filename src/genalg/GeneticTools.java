@@ -7,6 +7,7 @@ package genalg;
 import boolfun.BinTools;
 import java.util.Random;
 import boolfun.CombTools;
+import lon.*;
 
 public class GeneticTools {
     
@@ -23,6 +24,28 @@ public class GeneticTools {
         for(int i=1; i<fitnesses.length; i++) {
             
             if(fitnesses[i] >= fitnesses[maxfitpos]) {
+                maxfitpos = i;
+            }
+            
+        }
+        
+        return maxfitpos;
+        
+    }
+    
+    /**
+     * Find the position of the individual with maximum fitness value
+     * 
+     * @param fitnesses     array of fitness values of the population
+     * @return the position in the array fitnesses holding the maximum value
+     */
+    public static int findMaxFitIndivPos(SearchSolution[] populationSS) {
+        
+        int maxfitpos = 0;
+        
+        for(int i=1; i<populationSS.length; i++) {
+            
+            if(populationSS[i].fitness >= populationSS[maxfitpos].fitness) {
                 maxfitpos = i;
             }
             

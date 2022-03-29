@@ -9,10 +9,10 @@ package lon;
 import java.util.Arrays;
 
 public class SearchSolution{
-    boolean[] function;
-    int[] walsht;
-    double fitness;
-    int nvar;
+    public boolean[] function;
+    public int[] walsht;
+    public double fitness;
+    public int nvar;
 
     public SearchSolution(int nvar) {
         int n = (int)Math.pow(2,nvar);

@@ -6,6 +6,7 @@ package genalg;
 
 import boolfun.*;
 import oa.*;
+import lon.*;
 
 public class FitnessFunctions {
     
@@ -53,6 +54,54 @@ public class FitnessFunctions {
         }
         
         return fitness;
+        
+    }
+    
+    /**
+     * Compute the fitness of a boolean function. The fitness equals the value
+     * of nonlinearity of the function, computed through the Walsh transform,
+     * if the boolean function is balanced. Otherwise, the fitness is the
+     * nonlinearity of the function minus the unbalancedness.
+     * 
+     * @param function  A boolean function, represented by its truth table
+     * @param nvar      number of variables of the boolean function
+     * @param unbal     flag for specifying if unbalancedness must be considered
+     * @return          the value of nonlinearity of the boolean function
+     */
+    public static SearchSolution compFitnessBF_SS(boolean[] function, int nvar, boolean unbal) {
+        
+        double fitness = 0.0;
+        
+        //Step 1: convert the truth table in polar form (0 -> 1, 1 -> -1)
+        int[] poltable = BinTools.bin2Pol(function);
+        
+        //Step 2: compute the Fast Walsh Transform over the polar table.
+        //The returned value is the spectral radius (i.e. maximum absolute
+        //value of the Walsh transform) of the function, used to compute the
+        //nonlinearity later
+        int sprad = BoolTransf.calcFWT(poltable, 0, function.length);
+        
+        //Step 3: compute the nonlinearity from the spectral radius, and set it
+        //as the function fitness
+        int nl = BoolTransf.calcNL(sprad, nvar);
+        
+        //Step 4: if unbal is set, subtract it from the nonlinearity to compute
+        //the fitness function. Otherwise, use only nonlinearity
+        if(unbal) {
+            
+            //No need to compute unbalancedness from scratch, the value
+            //is the first coefficient in absolute value of the Walsh transform
+            int unb = Math.abs(poltable[0]);
+            fitness = nl - unb;
+            
+        } else {
+            
+            fitness = nl;
+            
+        }
+        SearchSolution ss = new SearchSolution(function,poltable,fitness,nvar);
+        
+        return ss;
         
     }
     
@@ -358,6 +407,7 @@ public class FitnessFunctions {
         
     }
     
+    
     /**
      * Compute the fitness of a population of boolean functions (ie, iterates
      * the method compFitnessBent() over an array of boolean arrays).
@@ -367,18 +417,18 @@ public class FitnessFunctions {
      * @param unbal         unbalancedness flag for fitness function
      * @return              an array of fitness, one for each function in the population
      */
-    public static double[] compFitnessBentPop(boolean[][] population, int nvar,
+    public static SearchSolution[] compFitnessBF_SSPop(boolean[][] population, int nvar,
             boolean unbal) {
         
         double[] fitnesses = new double[population.length];
-        
+        SearchSolution[] populationSS = new SearchSolution[population.length];
         for(int i=0; i<population.length; i++) {
             
             fitnesses[i] = compFitnessBent(population[i], nvar, unbal);
-            
+            populationSS[i] = compFitnessBF_SS(population[i], nvar, unbal);
         }
         
-        return fitnesses;
+        return populationSS;
         
     }
     

@@ -63,15 +63,18 @@ public class SteadyGALSBF {
         //Step 1: generate initial population of boolean functions of nvar
         //variables (unbalanced if we are using one-point crossover, balanced
         //otherwise), evaluate their fitness, and find best and worse individual
+        //store data about population in array of SearchSolution
+        SearchSolution[] populationSS;
         boolean[][] population;
         if(unbal) {
             population = GeneticTools.createUnbalPop(tlength, popsize, genrand);
         } else {
             population = GeneticTools.createBalPop(tlength, popsize, genrand);
         }
-        double[] fitnesses = FitnessFunctions.compFitnessBFPop(population, nvar, unbal);
-        int bestpos = GeneticTools.findMaxFitIndivPos(fitnesses);
-        double bestfit = fitnesses[bestpos];
+        populationSS = FitnessFunctions.compFitnessBF_SSPop(population, nvar, unbal);
+        //double[] fitnesses = FitnessFunctions.compFitnessBFPop(population, nvar, unbal);
+        int bestpos = GeneticTools.findMaxFitIndivPos(populationSS);
+        double bestfit = populationSS[bestpos].fitness;
         
         //Print initial information
         System.out.println("GA Info:");
@@ -89,11 +92,11 @@ public class SteadyGALSBF {
         //Compute average fitness and average HW
         double avgf = 0.0;
         double avghw = 0.0;
-        for(int l=0; l<fitnesses.length; l++) {
-            avgf += fitnesses[l];
+        for(int l=0; l<populationSS.length; l++) {
+            avgf += populationSS[l].fitness;
             avghw += BinTools.computeHW(population[l]);
         }
-        avgf /= fitnesses.length;
+        avgf /= populationSS.length;
         avghw /= population.length;
         System.out.println("Best fitness in initial population: "+bestfit);
         System.out.println("Average fitness in initial population: "+avgf);
@@ -109,7 +112,7 @@ public class SteadyGALSBF {
             //using tournament selection. In this case, the problem is of
             //maximizing the fitness function (=nonlinearity), so the objective
             //flag is set to true
-            int[] candpos = GeneticTools.tournSelection(popsize, fitnesses, tournsize, genrand, true);
+            int[] candpos = GeneticTools.tournSelection(popsize, populationSS, tournsize, genrand, true);
             
             //Step 2b: cross the two candidate parents, depending on the
             //crossover operator chosen
@@ -192,7 +195,7 @@ public class SteadyGALSBF {
                 
             }
             
-            if((fitchild > fitnesses[candpos[0]]) || (fitchild > fitnesses[candpos[1]])) {
+            if((fitchild > populationSS[candpos[0]]) || (fitchild > populationSS[candpos[1]])) {
                 
                 //the child's fitness value is better than at least that of one
                 //of its parents. Check if it is also better than the fitness of
