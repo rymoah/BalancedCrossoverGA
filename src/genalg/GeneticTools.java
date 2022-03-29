@@ -226,6 +226,44 @@ public class GeneticTools {
      *                      is to minimize or maximize the fitness function
      * @return 
      */
+    public static int[] tournSelectionSS(int popsize, SearchSolution[] pop,
+            int tsize, Random genrand, boolean objective) {
+        
+        int[] candpos = new int[tsize];
+        double[] candfit = new double[tsize];
+        
+        //Draw tsize individual at random from the population
+        for(int i=0; i<tsize; i++) {
+            
+            candpos[i] = genrand.nextInt(popsize);
+            candfit[i] = pop[candpos[i]].fitness;
+            
+        }
+        
+        //Determine the two winner parents as those having the lowest (objective=false) or highest (objective=true)
+        //fitness function value in the tournament pool
+        int[] winpos;
+        if(objective) {
+            winpos = findMaxFit2IndivPos(candfit);
+        } else {
+            winpos = findMinFit2IndivPos(candfit);
+        }
+        
+        return winpos;
+        
+    }
+    
+    /**
+     * Tournament selection operator. Returns an array containing the positions
+     * of the individuals selected for the tournament.
+     * 
+     * @param fitnesses     array of fitness values of the population
+     * @param tsize         tournament size
+     * @param genrand       a Random instance representing a pseudorandom generator
+     * @param objective     flag specifying whether the objective of the problem
+     *                      is to minimize or maximize the fitness function
+     * @return 
+     */
     public static int[] tournSelectionMatrix(int popsize, double[][] fitnesses,
             int tsize, Random genrand, boolean objective) {
         
