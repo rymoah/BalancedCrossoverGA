@@ -3,12 +3,100 @@
  * @author rymoah
  */
 
+import java.util.Vector;
 import java.util.Random;
 import boolfun.*;
 import genalg.*;
+import java.util.Arrays;
 import lon.*;
 
 public class SteadyGALSBF {
+    
+    public static double[] computePopStats(SearchSolution[] pop) {
+        
+        double avgfit = 0.0;
+        double varfit = 0.0;
+        double stdfit = 0.0;
+        double minfit = pop[0].fitness;
+        double maxfit = 0.0;
+        double medfit = 0.0;
+        double[] fitnesses = new double[pop.length];
+        
+        //compute average, max and min fitnesses
+        for(int i=0; i<pop.length; i++) {
+            fitnesses[i] = pop[i].fitness;
+            avgfit += fitnesses[i];
+            if(fitnesses[i] < minfit) {
+                minfit = fitnesses[i];
+            }
+            if(fitnesses[i] > maxfit) {
+                maxfit = fitnesses[i];
+            }
+        }
+        avgfit /= pop.length;
+        
+        //compute fitness variance and standard deviation
+        for(int i=0; i<pop.length; i++) {
+            varfit += Math.pow((fitnesses[i] - avgfit), 2);
+        }
+        varfit /= pop.length - 1;
+        stdfit = Math.sqrt(varfit);
+        
+        //Sort fitness array and compute median
+        Arrays.sort(fitnesses);
+        if(pop.length % 2 == 0) {
+            medfit = ((double)fitnesses[fitnesses.length/2] + (double)fitnesses[fitnesses.length/2 - 1])/2;
+        } else {
+            medfit = (double) fitnesses[fitnesses.length/2];
+        }
+        
+        double avgdist = 0.0;
+        double vardist = 0.0;
+        double stddist = 0.0;
+        double mindist = Math.pow(2, pop[0].nvar);
+        double maxdist = 0.0;
+        double meddist = 0.0;
+        
+        Vector<Double> dists = new Vector<Double>();
+        
+        //compute average, max and min distances
+        for(int i=0; i<pop.length-1; i++) {
+            for(int j=i+1; j<pop.length; j++) {
+                double dist = (double)BinTools.computeHD(pop[i].function, pop[j].function);
+                dists.add(dist);
+                avgdist += dist;
+                if(dist < mindist) {
+                    mindist = dist;
+                }
+                if(dist > maxdist) {
+                    maxdist = dist;
+                }
+            }
+        }
+        dists.trimToSize();
+        avgdist /= dists.capacity();
+        
+        //compute distance variance and standard deviation
+        for(int i=0; i<dists.capacity(); i++) {
+            vardist += Math.pow((dists.elementAt(i) - avgdist), 2);
+        }
+        vardist /= dists.capacity() - 1;
+        stddist = Math.sqrt(vardist);
+        
+        //Sort distance vector and compute median
+        Arrays.sort(fitnesses);
+        if(dists.capacity() % 2 == 0) {
+            meddist = ((double)dists.elementAt(dists.capacity()/2) + (double)dists.elementAt(dists.capacity()/2 - 1))/2;
+        } else {
+            meddist = (double)dists.elementAt(dists.capacity()/2);
+        }
+        
+        double[] stats = {avgfit, medfit, varfit, stdfit, maxfit, minfit, 
+                          avgdist, meddist, vardist, stddist, maxdist, mindist};
+        
+        return stats;
+        
+    }
     
     public static void main(String[] args) {
         
@@ -89,25 +177,24 @@ public class SteadyGALSBF {
         System.out.println("Seed: "+seed);
         
         //Print initial info
-        //Compute average fitness and average HW
-        double avgf = 0.0;
-        double avghw = 0.0;
-        for(int l=0; l<populationSS.length; l++) {
-            avgf += populationSS[l].fitness;
-            avghw += BinTools.computeHW(population[l]);
+        System.out.println("\nInitial population info:");
+        System.out.println("gen\teval\tavgf\tmedf\tvarf\tstdf\tmaxf\tminf\tavgd\tmedd\tvard\tstdd\tmaxd\tmind");
+        //Compute statistics
+        double[] stats = computePopStats(populationSS); 
+        System.out.print(0+"\t"+0+"\t");
+        for(int s=0; s<stats.length; s++) {
+            System.out.printf("%.2f", stats[s]);
+            System.out.print("\t");
         }
-        avgf /= populationSS.length;
-        avghw /= population.length;
+        System.out.println("");
         System.out.println("Best fitness in initial population: "+bestfit);
-        System.out.println("Average fitness in initial population: "+avgf);
-        System.out.println("Best initial individual: Function "+BinTools.bin2DecBig(population[bestpos]));
-        System.out.println("Best initial individual HW: "+BinTools.computeHW(population[bestpos]));
-        System.out.println("Average HW in final population: "+avghw);
         
-        System.out.println("Generation\tBest fit\tAvg fit\tBest HW\tavgHW");
+        System.out.println("\ngen\teval\tavgf\tmedf\tvarf\tstdf\tmaxf\tminf\tavgd\tmedd\tvard\tstdd\tmaxd\tmind");
         
         //Step 2: Iterate the Steady-state GA for fiteval evaluations
-        for(int i=0; i<fiteval; i++){
+        int i = 0;
+        int gen = 0;
+        while(i<fiteval){
             //Step 2a: select two individuals from the population for crossover,
             //using tournament selection. In this case, the problem is of
             //maximizing the fitness function (=nonlinearity), so the objective
@@ -183,17 +270,21 @@ public class SteadyGALSBF {
             
             //Step 2d: Evaluate child's fitness and apply elitist replacement
             SearchSolution child = FitnessFunctions.compFitnessBF_SS(childtable, nvar, false);
+            i++;
+            gen++;
             
             //Step 2e: Apply local search on the child
             if(steepest) {
                 
-                //..
+                child = LocalSearchTools.hillClimb(child.function, child.fitness, child.walsht, child.nvar);
                 
             } else {
                 
-                //..
+                child = LocalSearchTools.findBestNeighbor(child.function, child.fitness, child.walsht, child.nvar);             
                 
             }
+            
+            i += (child.eval/nvar);
             
             if((child.fitness > populationSS[candpos[0]].fitness) || (child.fitness > populationSS[candpos[1]].fitness)) {
                 
@@ -225,36 +316,32 @@ public class SteadyGALSBF {
                 
             }
             
-            if(i%freqprint == 0 && i>0) {
-                //Compute average fitness and average HW
-                avgf = 0.0;
-                avghw = 0.0;
-                for(int l=0; l<populationSS.length; l++) {
-                    avgf += populationSS[l].fitness;
-                    avghw += BinTools.computeHW(populationSS[l].function);
+            if(gen%freqprint == 0 && i>0) {
+                //Compute statistics
+                stats = computePopStats(populationSS); 
+                System.out.print(gen+"\t"+i+"\t");
+                for(int s=0; s<stats.length; s++) {
+                    System.out.printf("%.2f", stats[s]);
+                    System.out.print("\t");
                 }
-                avgf /= populationSS.length;
-                avghw /= populationSS.length;
-                System.out.println(i+"\t"+bestfit+"\t"+avgf+"\t"+BinTools.computeHW(populationSS[bestpos].function)+"\t"+avghw+"\t");
+                System.out.println("");
             }
             
         }
         
         //Print final info
         //Compute average fitness and average HW
-        avgf = 0.0;
-        avghw = 0.0;
-        for(int l=0; l<populationSS.length; l++) {
-            avgf += populationSS[l].fitness;
-            avghw += BinTools.computeHW(populationSS[l].function);
+        System.out.println("\nfinal population info:");
+        System.out.println("gen\teval\tavgf\tmedf\tvarf\tstdf\tmaxf\tminf\tavgd\tmedd\tvard\tstdd\tmaxd\tmind");
+        //Compute statistics
+        stats = computePopStats(populationSS); 
+        System.out.print(0+"\t"+0+"\t");
+        for(int s=0; s<stats.length; s++) {
+            System.out.printf("%.2f", stats[s]);
+            System.out.print("\t");
         }
-        avgf /= populationSS.length;
-        avghw /= population.length;
+        System.out.println("");
         System.out.println("Best fitness in final population: "+bestfit);
-        System.out.println("Average fitness in final population: "+avgf);
-        System.out.println("Best final individual: Function "+BinTools.bin2DecBig(populationSS[bestpos].function));
-        System.out.println("Best final individual HW: "+BinTools.computeHW(populationSS[bestpos].function));
-        System.out.println("Average HW in final population: "+avghw);
         
     }
     

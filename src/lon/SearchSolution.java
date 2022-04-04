@@ -13,12 +13,14 @@ public class SearchSolution{
     public int[] walsht;
     public double fitness;
     public int nvar;
+    public int eval;
 
     public SearchSolution(int nvar) {
         int n = (int)Math.pow(2,nvar);
         function = new boolean[n];
         walsht = new int[n];
-        fitness = 0;        
+        fitness = 0;      
+        eval = 0;
     }
     
     public SearchSolution(boolean[] function, int[] walsht, double fitness, int nvar) {
@@ -29,6 +31,7 @@ public class SearchSolution{
         System.arraycopy(walsht,0,this.walsht,0,n);
         this.fitness = fitness;
         this.nvar = nvar;
+        eval = 0;
     }
     
     public void updateFunction(boolean[] function, int[] walsht, double fitness){

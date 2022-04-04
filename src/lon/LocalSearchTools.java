@@ -97,7 +97,7 @@ public class LocalSearchTools {
         int n=function.length;
         boolean[] tempFunction = new boolean[n];
         
-        //genereting all neighboors
+        //generating all neighboors
         for (int i = 0; i < n; i++) {
             for (int j = i+1; j < n; j++) {
                 //swap only if the elements are different
@@ -109,7 +109,7 @@ public class LocalSearchTools {
                     //evaluate new solution
                     int[] upwalsht = updateWHTSwap(function, walsht, nvar, i, j);
                     double upfitness = FitnessFunctions.compFitnessBFGlob(upwalsht, nvar, false);
-                    
+                    best.eval++;
                     //check if the new solution is better 
                     //save the better one
                     if(upfitness>fitness){
@@ -137,11 +137,16 @@ public class LocalSearchTools {
         
         SearchSolution best = new SearchSolution(function, walsht, fitness, nvar);
         SearchSolution temp = new SearchSolution(nvar);
-        do{
+        int eval = 0;
+        do {
+            
             temp.updateFunction(best.function, best.walsht, best.fitness);
             best = findBestNeighbor(best.function, best.fitness, best.walsht, nvar);
-        }while(temp.fitness != best.fitness);
+            eval += best.eval;
+            
+        } while(temp.fitness != best.fitness);
         
+        best.eval = eval;
         return best;
     }
     
